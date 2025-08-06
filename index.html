@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>大樂透 隨機選號器</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #d9e2ec);
+      padding: 20px;
+      font-size: 18px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      font-size: 24px;
+    }
+    input, button {
+      font-size: 18px;
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+    .number-ball {
+      display: inline-block;
+      background-color: #fdd835;
+      color: black;
+      font-weight: bold;
+      font-size: 22px;
+      width: 40px;
+      height: 40px;
+      line-height: 40px;
+      border-radius: 50%;
+      text-align: center;
+      margin: 5px;
+      animation: bounce 0.5s ease;
+    }
+    @keyframes bounce {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>大樂透 隨機選號器</h2>
+    <label>排除號碼（用逗號分隔，例如：3,15,22）：</label>
+    <input type="text" id="excludeNumbers" placeholder="例如：3,15,22">
+    <label>要選幾個號碼（1-49）：</label>
+    <input type="number" id="numberCount" min="6" max="49" value="7">
+    <button onclick="generateNumbers()">產生號碼</button>
+    <div class="result" id="result"></div>
+    <div class="result" id="combinationInfo"></div>
+  </div>
+
+  <script>
+    function generateNumbers() {
+      const excludeInput = document.getElementById("excludeNumbers").value;
+      const excludeNumbers = excludeInput.split(',').map(num => parseInt(num.trim())).filter(num => !isNaN(num));
+      const count = parseInt(document.getElementById("numberCount").value);
+
+      let pool = [];
+      for (let i = 1; i <= 49; i++) {
+        if (!excludeNumbers.includes(i)) {
+          pool.push(i);
+        }
+      }
+
+      if (count > pool.length) {
+        document.getElementById("result").innerText = "排除號碼太多，無法選出足夠的號碼！";
+        document.getElementById("combinationInfo").innerText = "";
+        return;
+      }
+
+      let selected = [];
+      while (selected.length < count) {
+        const index = Math.floor(Math.random() * pool.length);
+        selected.push(pool.splice(index, 1)[0]);
+      }
+
+      selected.sort((a, b) => a - b);
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = selected.map(num => `<span class="number-ball">${num}</span>`).join('');
+
+      // Calculate combinations of 5 numbers
+      const comboCount = factorial(selected.length) / (factorial(6) * factorial(selected.length - 6));
+      const totalCost = comboCount * 50;
+      document.getElementById("combinationInfo").innerHTML = `
+        <p>可產生組合數：<strong>${comboCount.toLocaleString()}</strong> 組</p>
+        <p>總花費：<strong>${totalCost.toLocaleString()}</strong> 元</p>
+      `;
+    }
+
+    function factorial(n) {
+      return n <= 1 ? 1 : n * factorial(n - 1);
+    }
+  </script>
+</body>
+</html>
